@@ -4,6 +4,7 @@ import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-ethers";
 import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomicfoundation/hardhat-viem";
+import "@semaphore-protocol/hardhat";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
