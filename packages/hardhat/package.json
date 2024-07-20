@@ -48,6 +48,9 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.1",
+    "@semaphore-protocol/contracts": "^4.0.0-beta.18",
+    "@semaphore-protocol/core": "^4.0.0-beta.18",
+    "@semaphore-protocol/hardhat": "^4.0.0-beta.18",
     "@typechain/ethers-v6": "^0.5.1",
     "dotenv": "^16.0.3",
     "envfile": "^6.18.0",
