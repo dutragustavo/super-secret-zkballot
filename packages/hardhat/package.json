@@ -47,6 +47,7 @@
     "typescript": "^5.1.6"
   },
   "dependencies": {
+    "@nomicfoundation/hardhat-viem": "^2.0.3",
     "@openzeppelin/contracts": "^4.8.1",
     "@semaphore-protocol/contracts": "^4.0.0-beta.18",
     "@semaphore-protocol/core": "^4.0.0-beta.18",
@@ -54,6 +55,7 @@
     "@typechain/ethers-v6": "^0.5.1",
     "dotenv": "^16.0.3",
     "envfile": "^6.18.0",
-    "qrcode": "^1.5.1"
+    "qrcode": "^1.5.1",
+    "viem": "^2.17.8"
   }
 }

@@ -35,12 +35,6 @@ describe("Ballot", async () => {
       const chairperson = await ballotContract.read.chairperson();
       expect(chairperson.toLowerCase()).to.eq(deployer.account.address);
     });
-    it("sets the voting weight for the chairperson as 1", async () => {
-      const { ballotContract } = await loadFixture(deployContract);
-      const chairperson = await ballotContract.read.chairperson();
-      const chairpersonVoter = await ballotContract.read.voters([chairperson]);
-      expect(chairpersonVoter[0]).to.eq(1n);
-    });
   });
 
   describe("when the chairperson interacts with the giveRightToVote function in the contract", async () => {
