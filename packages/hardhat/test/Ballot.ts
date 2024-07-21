@@ -1,14 +1,23 @@
 import { expect } from "chai";
 import { toHex, hexToString } from "viem";
-import { viem } from "hardhat";
+import { viem, run } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+// import { Group, Identity, generateProof } from "@semaphore-protocol/core"
 
 const PROPOSALS = ["Proposal 1", "Proposal 2", "Proposal 3"];
 
 async function deployContract() {
+  const { semaphore } = await run("deploy:semaphore", {
+    logs: false,
+  });
+  const semaphoreAddress = await semaphore.getAddress();
   const publicClient = await viem.getPublicClient();
   const [deployer, otherAccount] = await viem.getWalletClients();
-  const ballotContract = await viem.deployContract("Ballot", [PROPOSALS.map(prop => toHex(prop, { size: 32 }))]);
+
+  const ballotContract = await viem.deployContract("Ballot", [
+    PROPOSALS.map(prop => toHex(prop, { size: 32 })),
+    semaphoreAddress,
+  ]);
   return { publicClient, deployer, otherAccount, ballotContract };
 }
 
