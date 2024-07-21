@@ -7,7 +7,7 @@ import "@semaphore-protocol/contracts/interfaces/ISemaphore.sol";
 contract Ballot {
 
     ISemaphore public semaphore;
-    uint256 groupId;
+    uint256 public groupId;
 
     struct Voter {
         bool joined;
@@ -33,13 +33,14 @@ contract Ballot {
     }
 
     function vote(uint proposal, ISemaphore.SemaphoreProof calldata proof) external {
-        Voter storage sender = voters[msg.sender];
+        Voter storage voter = voters[msg.sender];
+        require(voter.joined, "Did not joined the voting group");
 
         // This will validate the proof and revert if the proof was already used
         // which means that each user that joined can only vote once 
         semaphore.validateProof(groupId, proof);
 
-        sender.vote = proposal;
+        voter.vote = proposal;
 
         // If `proposal` is out of the range of the array,
         // this will throw automatically and revert all
