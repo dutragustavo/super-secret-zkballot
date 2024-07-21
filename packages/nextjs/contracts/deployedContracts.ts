@@ -4,6 +4,194 @@
  */
 import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 
-const deployedContracts = {} as const;
+const deployedContracts = {
+  31337: {
+    Ballot: {
+      address: "0x9A676e781A523b5d0C0e43731313A708CB607508",
+      abi: [
+        {
+          inputs: [
+            {
+              internalType: "bytes32[]",
+              name: "proposalNames",
+              type: "bytes32[]",
+            },
+            {
+              internalType: "contract ISemaphore",
+              name: "_semaphore",
+              type: "address",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          inputs: [],
+          name: "groupId",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "identityCommitment",
+              type: "uint256",
+            },
+          ],
+          name: "joinBallot",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "proposals",
+          outputs: [
+            {
+              internalType: "bytes32",
+              name: "name",
+              type: "bytes32",
+            },
+            {
+              internalType: "uint256",
+              name: "voteCount",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "semaphore",
+          outputs: [
+            {
+              internalType: "contract ISemaphore",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "proposal",
+              type: "uint256",
+            },
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "merkleTreeDepth",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "merkleTreeRoot",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "nullifier",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "message",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "scope",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256[8]",
+                  name: "points",
+                  type: "uint256[8]",
+                },
+              ],
+              internalType: "struct ISemaphore.SemaphoreProof",
+              name: "proof",
+              type: "tuple",
+            },
+          ],
+          name: "vote",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "voters",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "joined",
+              type: "bool",
+            },
+            {
+              internalType: "uint256",
+              name: "vote",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "winnerName",
+          outputs: [
+            {
+              internalType: "bytes32",
+              name: "winnerName_",
+              type: "bytes32",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "winningProposal",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "winningProposal_",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+      ],
+      inheritedFunctions: {},
+    },
+  },
+} as const;
 
 export default deployedContracts satisfies GenericContractsDeclaration;
