@@ -88,20 +88,14 @@ describe("Ballot", async () => {
         client: { wallet: otherAccount },
       });
 
-      await expect(contractAsOtherAccount.write.vote([1n])).to.be.rejectedWith("Has no right to vote");
-    });
-  });
+      const user = new Identity();
+      const group = new Group([user.commitment]);
+      const groupId = (await ballotContract.read.groupId()) as number;
+      const proposalId = 0;
+      const proof = await generateProof(user, group, proposalId, groupId);
 
-  describe("when an account without right to vote interacts with the delegate function in the contract", async () => {
-    it("should revert", async () => {
-      const { ballotContract, otherAccount, deployer } = await loadFixture(deployContract);
-
-      const contractAsOtherAccount = await viem.getContractAt("Ballot", ballotContract.address, {
-        client: { wallet: otherAccount },
-      });
-
-      await expect(contractAsOtherAccount.write.delegate([deployer.account.address])).to.be.rejectedWith(
-        "You have no right to vote",
+      await expect(contractAsOtherAccount.write.vote([1n, proof])).to.be.rejectedWith(
+        "Did not joined the voting group",
       );
     });
   });
