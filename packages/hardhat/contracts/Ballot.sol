@@ -74,4 +74,8 @@ contract Ballot {
     function winnerName() external view returns (bytes32 winnerName_) {
         winnerName_ = proposals[winningProposal()].name;
     }
+
+    function proposalCount() public view returns(uint count) {
+    return proposals.length;
+}
 }
