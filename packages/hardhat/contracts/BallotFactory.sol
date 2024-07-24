@@ -31,4 +31,8 @@ contract BallotFactory {
         
         return address(ballots[index]);
     }
+
+    function getAllBallots() public view returns (Ballot[] memory) {
+        return ballots;
+    }    
 }

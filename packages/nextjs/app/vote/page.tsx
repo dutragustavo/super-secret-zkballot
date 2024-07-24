@@ -9,7 +9,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import { useReadBallotContract } from "~~/hooks/useReadBallotContract";
 import { useWriteBallotContract } from "~~/hooks/useWriteBallotContract";
-import { Hex, hexToString } from "viem";
+import { Address, Hex, hexToString } from "viem";
+import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 
 interface Proposal {
   name: string;
@@ -46,13 +47,16 @@ const Vote: NextPage = () => {
     setLog("Your new Semaphore identity has just been created 🎉")
   }, [setLog])
 
+  const {data: ballots} = useScaffoldReadContract({
+    contractName: "BallotFactory",
+    functionName: "getAllBallots",
+  });
+
   const {data: proposals} = useReadBallotContract({
     contractName: "Ballot",
     functionName: "getAllProposals",
     address: ballotAddress,
   });
-
-
 
   const { data: voterUser } = useReadBallotContract({
     functionName: "voters",
@@ -97,19 +101,25 @@ const Vote: NextPage = () => {
 
           {_identity && (
             <div>
-              <p><strong>Current Ballot Address: </strong><br /> {ballotAddress}</p>
-              <button
-                className="mt-2 btn btn-secondary"
-                onClick={async () => {
-                  try {
-                    await writeBallotAsync({ functionName: "joinBallot", args: [_identity.commitment] });
-                  } catch (err) {
-                    console.error("Error joining the ballot");
-                  }
-                }}
-              >
-                Join Ballot
-              </button>
+              <p><strong>Ballots to join: </strong><br /></p>
+              <div className="flex flex-wrap gap-5">
+              {ballots?.map((ballot: any, i: number) => (
+              <div key={ballot.id} className="flex flex-col items-center">
+                <button
+                  className="mt-2 btn btn-secondary"
+                  onClick={async () => {
+                    try {
+                      await writeBallotAsync({ functionName: "joinBallot", args: [_identity.commitment], address: ballot });
+                    } catch (err) {
+                      console.error(err);
+                    }
+                  }}
+                >
+                  Join Ballot {i}
+                </button>
+              </div>
+              ))}
+              </div>
             </div>
           )}
           <hr />
@@ -133,20 +143,20 @@ const Vote: NextPage = () => {
                           
                           // Group of only one user, just for the local tests
                           const group = new Group([_identity.commitment]);
-                          const proposalId = 0n;
+                          const proposalId = BigInt(i);
                           const { points, merkleTreeDepth, merkleTreeRoot, nullifier } = await generateProof(
                             _identity, 
                             group, 
-                            BigInt(i), 
+                            proposalId, 
                             Number(groupId)
                           );
                           await writeBallotAsync({ functionName: "vote", args: [
-                            BigInt(i), 
+                            proposalId, 
                             {
                               merkleTreeDepth: BigInt(merkleTreeDepth),
                               merkleTreeRoot: merkleTreeRoot,
                               nullifier: nullifier,
-                              message: BigInt(i),
+                              message: proposalId,
                               scope: BigInt(groupId || 0n),
                               points: points,
                             }
