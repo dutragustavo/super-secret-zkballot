@@ -6,7 +6,10 @@ import { generateProof, Group, Identity } from "@semaphore-protocol/core"
 // import { SemaphoreSubgraph } from "@semaphore-protocol/data"
 import { useLogContext } from "../../context/LogContext";
 import { useCallback, useEffect, useState } from "react";
-import { useDeployedContractInfo, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { useLocalStorage } from "usehooks-ts";
+import { useReadBallotContract } from "~~/hooks/useReadBallotContract";
+import { useWriteBallotContract } from "~~/hooks/useWriteBallotContract";
+import { Hex, hexToString } from "viem";
 
 interface Proposal {
   name: string;
@@ -17,6 +20,7 @@ const Vote: NextPage = () => {
   const { address: connectedAddress } = useAccount();
   const { setLog } = useLogContext()
   const [_identity, setIdentity] = useState<Identity>()
+  const [ballotAddress] = useLocalStorage('ballotAddress', '');
 
   useEffect(() => {
     const privateKey = localStorage.getItem("identity")
@@ -42,58 +46,31 @@ const Vote: NextPage = () => {
     setLog("Your new Semaphore identity has just been created 🎉")
   }, [setLog])
 
-  const { data: proposalCount } = useScaffoldReadContract({
+  const {data: proposals} = useReadBallotContract({
     contractName: "Ballot",
-    functionName: "proposalCount",
+    functionName: "getAllProposals",
+    address: ballotAddress,
   });
 
 
-  const [proposals, setProposals] = useState<Proposal[]>([]);
 
-  useEffect(() => {
-    async function fetchProposals() {
-      if (typeof proposalCount === 'number') {
-        const proposalsArray: Proposal[] = [];
-        for (let i = 0; i < proposalCount; i++) {
-          const proposal = await useScaffoldReadContract({
-            contractName: "Ballot",
-            functionName: "proposals",
-            args: [BigInt(i)],
-          });
-          // Assume proposal.data returns the necessary data in the correct format
-          if (proposal.data) {
-            proposalsArray.push({
-              name: proposal.data[0],
-              voteCount: proposal.data[1] // Adjust according to actual data structure
-            });
-          }
-        }
-        setProposals(proposalsArray);
-      }
-    }
-
-    fetchProposals();
-  }, [proposalCount]);
-
-  const { data: voterUser } = useScaffoldReadContract({
-    contractName: "Ballot",
+  const { data: voterUser } = useReadBallotContract({
     functionName: "voters",
+    address: ballotAddress,
     args: [connectedAddress],
   });
 
-  const { data: groupId } = useScaffoldReadContract({
-    contractName: "Ballot",
+  const { data: groupId } = useReadBallotContract({
+    address: ballotAddress,
     functionName: "groupId",
   });
 
-  const { writeContractAsync: writeBallotAsync } = useScaffoldWriteContract("Ballot");
-  const { data: ballotContractData } = useDeployedContractInfo("Ballot");
-
+  const { writeContractAsync: writeBallotAsync } = useWriteBallotContract(ballotAddress);
 
   return (
     <>
       <>
-        <div className="flex items-center flex-col flex-grow pt-10">
+        <div className="flex flex-col items-center flex-grow pt-10">
           <h2>Identities</h2>
           <p>
             The identity of a user in the Semaphore protocol. Learn more about <a href="https://docs.semaphore.pse.dev/guides/identities" target="_blank">Semaphore identity</a> and <a href="https://github.com/privacy-scaling-explorations/zk-kit/tree/main/packages/eddsa-poseidon" target="_blank">EdDSA</a>.
@@ -111,7 +88,7 @@ const Vote: NextPage = () => {
           )}
           <div>
             <button
-              className="btn btn-secondary mt-2" onClick={createIdentity}
+              className="mt-2 btn btn-secondary" onClick={createIdentity}
             >
               Create Identity
             </button>
@@ -120,9 +97,9 @@ const Vote: NextPage = () => {
 
           {_identity && (
             <div>
-              <p><strong>Current Ballot Address: </strong><br /> {ballotContractData?.address}</p>
+              <p><strong>Current Ballot Address: </strong><br /> {ballotAddress}</p>
               <button
-                className="btn btn-secondary mt-2"
+                className="mt-2 btn btn-secondary"
                 onClick={async () => {
                   try {
                     await writeBallotAsync({ functionName: "joinBallot", args: [_identity.commitment] });
@@ -140,56 +117,55 @@ const Vote: NextPage = () => {
           {/* User Joined, time to vote*/}
           {voterUser?.[0] && _identity && (
             <div>
-              <p><strong>Proposals</strong><br /> {ballotContractData?.address}</p>
-              <div>
-                {proposals.map((proposal, index) => (
-                  <div key={index}>
-                    <p>Proposal {index + 1}: {proposal.name}</p>
+              <p><strong>Proposals</strong><br /> {ballotAddress}</p>
+              <div className="flex flex-wrap gap-5">
+                {proposals?.map((proposal: any, i: number) => (
+                  <div key={proposal} className="flex flex-col items-center">
+                    <button
+                      className="mt-2 btn btn-secondary"
+                      onClick={async () => {
+                        try {
+                          // Uncomment this when we deploy to Sepolia. We'll recreate the group from the Ballot contract 
+                          // to replicate the on-chain group off-chain. This is needed to generate the proofs.
+                          // const semaphoreSubgraph = new SemaphoreSubgraph("sepolia")
+                          // const { members } = await semaphoreSubgraph.getGroup(groupId?.toString() || "0", { members: true })
+                          // const group = new Group(members);
+                          
+                          // Group of only one user, just for the local tests
+                          const group = new Group([_identity.commitment]);
+                          const proposalId = 0n;
+                          const { points, merkleTreeDepth, merkleTreeRoot, nullifier } = await generateProof(
+                            _identity, 
+                            group, 
+                            BigInt(i), 
+                            Number(groupId)
+                          );
+                          await writeBallotAsync({ functionName: "vote", args: [
+                            BigInt(i), 
+                            {
+                              merkleTreeDepth: BigInt(merkleTreeDepth),
+                              merkleTreeRoot: merkleTreeRoot,
+                              nullifier: nullifier,
+                              message: BigInt(i),
+                              scope: BigInt(groupId || 0n),
+                              points: points,
+                            }
+                          ] });
+                        } catch (err) {
+                          console.error("Error joining the ballot");
+                        }
+                      }}
+                    >
+                      Vote for {hexToString(proposal.name as Hex, {size: 32})}
+                    </button>
+
+                    <span>{proposal.voteCount.toString()} votes</span>
                   </div>
                 ))}
+        
+
+           
               </div>
-
-              {/*This button will only vote for the proposal 0 
-                Putting it here just to save the voting logic */}
-              
-              <button
-                className="btn btn-secondary mt-2"
-                onClick={async () => {
-                  try {
-                    // Uncomment this when we deploy to Sepolia. We'll recreate the group from the Ballot contract 
-                    // to replicate the on-chain group off-chain. This is needed to generate the proofs.
-                    // const semaphoreSubgraph = new SemaphoreSubgraph("sepolia")
-                    // const { members } = await semaphoreSubgraph.getGroup(groupId?.toString() || "0", { members: true })
-                    // const group = new Group(members);
-                    
-                    // Group of only one user, just for the local tests
-                    const group = new Group([_identity.commitment]);
-                    const proposalId = 0n;
-                    const { points, merkleTreeDepth, merkleTreeRoot, nullifier } = await generateProof(
-                      _identity, 
-                      group, 
-                      proposalId, 
-                      Number(groupId)
-                    );
-                    await writeBallotAsync({ functionName: "vote", args: [
-                      proposalId, 
-                      {
-                        merkleTreeDepth: BigInt(merkleTreeDepth),
-                        merkleTreeRoot: merkleTreeRoot,
-                        nullifier: nullifier,
-                        message: proposalId,
-                        scope: BigInt(groupId || 0n),
-                        points: points,
-                      }
-                    ] });
-                  } catch (err) {
-                    console.error("Error joining the ballot");
-                  }
-                }}
-              >
-                Vote for proposal 0
-              </button>
-
             </div>
           )}
 

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useTargetNetwork } from "./useTargetNetwork";
+import { useTargetNetwork } from "./scaffold-eth/useTargetNetwork";
 import { MutateOptions } from "@tanstack/react-query";
-import { Abi, ExtractAbiFunctionNames } from "abitype";
+import { Abi, Address, ExtractAbiFunctionNames } from "abitype";
 import { Config, UseWriteContractParameters, useAccount, useWriteContract } from "wagmi";
 import { WriteContractErrorType, WriteContractReturnType } from "wagmi/actions";
 import { WriteContractVariables } from "wagmi/query";
@@ -13,6 +13,7 @@ import {
   ScaffoldWriteContractOptions,
   ScaffoldWriteContractVariables,
 } from "~~/utils/scaffold-eth/contract";
+import { abi } from "../../hardhat/artifacts/contracts/Ballot.sol/Ballot.json";
 
 /**
  * Wrapper around wagmi's useWriteContract hook which automatically loads (by name) the contract ABI and address from
@@ -20,8 +21,8 @@ import {
  * @param contractName - name of the contract to be written to
  * @param writeContractParams - wagmi's useWriteContract parameters
  */
-export const useScaffoldWriteContract = <TContractName extends ContractName>(
-  contractName: TContractName,
+export const useWriteBallotContract = (
+  address: Address,
   writeContractParams?: UseWriteContractParameters,
 ) => {
   const { chain } = useAccount();
@@ -31,19 +32,12 @@ export const useScaffoldWriteContract = <TContractName extends ContractName>(
 
   const wagmiContractWrite = useWriteContract(writeContractParams);
 
-  const { data: deployedContractData } = useDeployedContractInfo(contractName);
-
   const sendContractWriteAsyncTx = async <
-    TFunctionName extends ExtractAbiFunctionNames<ContractAbi<TContractName>, "nonpayable" | "payable">,
+    TFunctionName extends ExtractAbiFunctionNames<any, "nonpayable" | "payable">,
   >(
-    variables: ScaffoldWriteContractVariables<TContractName, TFunctionName>,
+    variables: any,
     options?: ScaffoldWriteContractOptions,
   ) => {
-    if (!deployedContractData) {
-      notification.error("Target Contract is not deployed, did you forget to run `yarn deploy`?");
-      return;
-    }
-
     if (!chain?.id) {
       notification.error("Please connect your wallet");
       return;
@@ -59,8 +53,8 @@ export const useScaffoldWriteContract = <TContractName extends ContractName>(
       const makeWriteWithParams = () =>
         wagmiContractWrite.writeContractAsync(
           {
-            abi: deployedContractData.abi as Abi,
-            address: deployedContractData.address,
+            abi,
+            address,
             ...variables,
           } as WriteContractVariables<Abi, string, any[], Config, number>,
           mutateOptions as
@@ -89,10 +83,6 @@ export const useScaffoldWriteContract = <TContractName extends ContractName>(
     variables: ScaffoldWriteContractVariables<TContractName, TFunctionName>,
     options?: Omit<ScaffoldWriteContractOptions, "onBlockConfirmation" | "blockConfirmations">,
   ) => {
-    if (!deployedContractData) {
-      notification.error("Target Contract is not deployed, did you forget to run `yarn deploy`?");
-      return;
-    }
     if (!chain?.id) {
       notification.error("Please connect your wallet");
       return;
@@ -104,8 +94,8 @@ export const useScaffoldWriteContract = <TContractName extends ContractName>(
 
     wagmiContractWrite.writeContract(
       {
-        abi: deployedContractData.abi as Abi,
-        address: deployedContractData.address,
+        abi,
+        address,
         ...variables,
       } as WriteContractVariables<Abi, string, any[], Config, number>,
       options as
