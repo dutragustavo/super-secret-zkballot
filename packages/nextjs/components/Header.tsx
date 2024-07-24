@@ -30,10 +30,16 @@ export const menuLinks: HeaderMenuLink[] = [
     icon: <WrenchIcon className="w-4 h-4" />,
   },
   {
+    label: "Join",
+    href: "join",
+    icon: <ScaleIcon className="w-4 h-4" />,
+  },
+  {
     label: "Vote",
     href: "vote",
     icon: <ScaleIcon className="w-4 h-4" />,
   },
+
 ];
 
 export const HeaderMenuLinks = () => {
