@@ -6,16 +6,11 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 
 const deployedContracts = {
   31337: {
-    Ballot: {
-      address: "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
+    BallotFactory: {
+      address: "0x9d4454B023096f34B160D6B654540c56A1F81688",
       abi: [
         {
           inputs: [
-            {
-              internalType: "bytes32[]",
-              name: "proposalNames",
-              type: "bytes32[]",
-            },
             {
               internalType: "contract ISemaphore",
               name: "_semaphore",
@@ -26,13 +21,38 @@ const deployedContracts = {
           type: "constructor",
         },
         {
-          inputs: [],
-          name: "groupId",
-          outputs: [
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "address",
+              name: "ballotAddress",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "groupId",
+              type: "uint256",
+            },
+          ],
+          name: "BallotCreated",
+          type: "event",
+        },
+        {
+          inputs: [
             {
               internalType: "uint256",
               name: "",
               type: "uint256",
+            },
+          ],
+          name: "ballots",
+          outputs: [
+            {
+              internalType: "contract Ballot",
+              name: "",
+              type: "address",
             },
           ],
           stateMutability: "view",
@@ -41,24 +61,30 @@ const deployedContracts = {
         {
           inputs: [
             {
-              internalType: "uint256",
-              name: "identityCommitment",
-              type: "uint256",
+              internalType: "bytes32[]",
+              name: "proposalNames",
+              type: "bytes32[]",
             },
           ],
-          name: "joinBallot",
-          outputs: [],
+          name: "createBallot",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
           stateMutability: "nonpayable",
           type: "function",
         },
         {
           inputs: [],
-          name: "proposalCount",
+          name: "getAllBallots",
           outputs: [
             {
-              internalType: "uint256",
-              name: "count",
-              type: "uint256",
+              internalType: "contract Ballot[]",
+              name: "",
+              type: "address[]",
             },
           ],
           stateMutability: "view",
@@ -68,20 +94,28 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "uint256",
-              name: "",
+              name: "index",
               type: "uint256",
             },
           ],
-          name: "proposals",
+          name: "getBallotAddress",
           outputs: [
             {
-              internalType: "bytes32",
-              name: "name",
-              type: "bytes32",
+              internalType: "address",
+              name: "",
+              type: "address",
             },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getBallotCount",
+          outputs: [
             {
               internalType: "uint256",
-              name: "voteCount",
+              name: "",
               type: "uint256",
             },
           ],
@@ -96,106 +130,6 @@ const deployedContracts = {
               internalType: "contract ISemaphore",
               name: "",
               type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "uint256",
-              name: "proposal",
-              type: "uint256",
-            },
-            {
-              components: [
-                {
-                  internalType: "uint256",
-                  name: "merkleTreeDepth",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "merkleTreeRoot",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "nullifier",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "message",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "scope",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256[8]",
-                  name: "points",
-                  type: "uint256[8]",
-                },
-              ],
-              internalType: "struct ISemaphore.SemaphoreProof",
-              name: "proof",
-              type: "tuple",
-            },
-          ],
-          name: "vote",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          name: "voters",
-          outputs: [
-            {
-              internalType: "bool",
-              name: "joined",
-              type: "bool",
-            },
-            {
-              internalType: "uint256",
-              name: "vote",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "winnerName",
-          outputs: [
-            {
-              internalType: "bytes32",
-              name: "winnerName_",
-              type: "bytes32",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "winningProposal",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "winningProposal_",
-              type: "uint256",
             },
           ],
           stateMutability: "view",

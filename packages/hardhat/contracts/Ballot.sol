@@ -76,6 +76,10 @@ contract Ballot {
     }
 
     function proposalCount() public view returns(uint count) {
-    return proposals.length;
-}
+        return proposals.length;
+    }
+
+    function getAllProposals() public view returns (Proposal[] memory) {
+        return proposals;
+    }
 }
