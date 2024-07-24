@@ -25,8 +25,8 @@ export const menuLinks: HeaderMenuLink[] = [
     icon: <BugAntIcon className="w-4 h-4" />,
   },
   {
-    label: "Deploy",
-    href: "deploy",
+    label: "Create Ballot",
+    href: "create",
     icon: <WrenchIcon className="w-4 h-4" />,
   },
   {
