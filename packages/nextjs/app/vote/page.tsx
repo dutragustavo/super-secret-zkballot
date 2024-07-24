@@ -3,7 +3,7 @@
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { generateProof, Group, Identity } from "@semaphore-protocol/core"
-// import { SemaphoreSubgraph } from "@semaphore-protocol/data"
+import { SemaphoreSubgraph } from "@semaphore-protocol/data"
 import { useLogContext } from "../../context/LogContext";
 import { useCallback, useEffect, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
@@ -57,15 +57,14 @@ const Vote: NextPage = () => {
                         try {
                           // Uncomment this when we deploy to Sepolia. We'll recreate the group from the Ballot contract 
                           // to replicate the on-chain group off-chain. This is needed to generate the proofs.
-                          // const semaphoreSubgraph = new SemaphoreSubgraph("sepolia")
-                          // const { members } = await semaphoreSubgraph.getGroup(groupId?.toString() || "0", { members: true })
-                          // const group = new Group(members);
+                          const semaphoreSubgraph = new SemaphoreSubgraph("sepolia")
+                          const { members } = await semaphoreSubgraph.getGroup(groupId?.toString() || "0", { members: true })
+                          const group = new Group(members);
                           
                           // Group of only one user, just for the local tests
                           const privKey = localStorage.getItem("identity");
                           const identity = new Identity(Buffer.from(privKey!, "base64"));
-                          const group = new Group([identity.commitment]);
-                          console.log(identity.commitment);
+                          // const group = new Group([identity.commitment]);
                           const proposalId = BigInt(i);
                           const { points, merkleTreeDepth, merkleTreeRoot, nullifier } = await generateProof(
                             identity, 
@@ -85,7 +84,7 @@ const Vote: NextPage = () => {
                             }
                           ] });
                         } catch (err) {
-                          console.error("Error joining the ballot");
+                          console.error(err);
                         }
                       }}
                     >
