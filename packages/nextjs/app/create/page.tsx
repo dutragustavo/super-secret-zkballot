@@ -2,10 +2,9 @@
 
 import type { NextPage } from "next";
 import { useAccount, useWriteContract } from "wagmi";
-// import { SemaphoreSubgraph } from "@semaphore-protocol/data"
 import { useLogContext } from "../../context/LogContext";
 import { useCallback, useEffect, useState } from "react";
-import {  useScaffoldWatchContractEvent, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { useScaffoldWatchContractEvent, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { toHex } from "viem";
 import { useLocalStorage } from "usehooks-ts";
 import { PlusCircleIcon, PlusIcon } from "@heroicons/react/24/outline";
@@ -18,7 +17,7 @@ interface Proposal {
 
 const Deploy: NextPage = () => {
   const [ballotAddress, setBallotAddress] = useLocalStorage('ballotAddress', '');
-  const { writeContractAsync: writeBallotFactoryAsync} = useScaffoldWriteContract('BallotFactory');
+  const { writeContractAsync: writeBallotFactoryAsync } = useScaffoldWriteContract('BallotFactory');
   const [proposals, setProposals] = useState<string[]>(['Proposal 1', 'Proposal 2', 'Proposal 3']);
   const [isWaiting, setIsWaiting] = useState(false);
 
@@ -29,7 +28,7 @@ const Deploy: NextPage = () => {
       logs.map(log => {
         const { ballotAddress: newBallotAddress } = log.args;
 
-        if(!newBallotAddress || newBallotAddress === ballotAddress) return;
+        if (!newBallotAddress || newBallotAddress === ballotAddress) return;
 
         setBallotAddress(newBallotAddress);
 
@@ -40,22 +39,30 @@ const Deploy: NextPage = () => {
   });
 
   return (
-    <div className="flex flex-col items-center flex-grow pt-10">
-      {proposals.map((proposal, index) => (
-        <input
-          key={index}
-          value={proposal}
-          onChange={(e) => {
-            const newProposals = [...proposals];
-            newProposals[index] = e.target.value;
-            setProposals(newProposals);
-          }}
-          className="px-4 py-2 mb-4 text-white border rounded-md w-96"
-        />
-      ))}
-      <button className="p-4 mb-5 rounded-full bg-slate-600 size-14" onClick={() => setProposals(
-        (current) => current.concat('Proposal ' + (current.length + 1))
-      )}><PlusIcon /></button>
+    <div className="flex flex-col items-center flex-grow pt-10 space-y-6 bg-base-200 p-6 rounded-lg shadow-md">
+      <h1 className="mb-5 text-5xl font-bold text-neutral" >Create new Ballot from scratch</h1>
+      <b className="mb-5 text-2xl text-accent" style={{ opacity: 1.2 }}> Enter the name of each proposal for your ballot</b>
+      <div className="flex flex-col items-center space-y-2 w-full">
+        {proposals.map((proposal, index) => (
+          <input
+            key={index}
+            value={proposal}
+            onChange={(e) => {
+              const newProposals = [...proposals];
+              newProposals[index] = e.target.value;
+              setProposals(newProposals);
+            }}
+            className="input input-bordered w-full max-w-lg"
+            placeholder={`Proposal ${index + 1}`}
+          />
+        ))}
+        <button
+          className="btn btn-outline btn-circle"
+          onClick={() => setProposals((current) => current.concat(`Proposal ${current.length + 1}`))}
+        >
+          <PlusIcon className="h-5 w-5" />
+        </button>
+      </div>
 
       <button
         onClick={async () => {
@@ -66,14 +73,20 @@ const Deploy: NextPage = () => {
           });
         }}
         disabled={isWaiting}
-        className="px-4 py-2 text-white rounded-md bg-primary">
+        className={`btn btn-primary ${isWaiting ? 'loading' : ''}`}
+      >
         {isWaiting ? 'Waiting...' : 'Deploy Ballot'}
-        </button>
+      </button>
 
-        {ballotAddress && <p>Current Ballot Address: {ballotAddress}</p>}
+      {ballotAddress && (
+        <div className="alert alert-info shadow-lg mt-4 w-full max-w-lg">
+          <div>
+            <span>Current Ballot Address: {ballotAddress}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default Deploy;
-

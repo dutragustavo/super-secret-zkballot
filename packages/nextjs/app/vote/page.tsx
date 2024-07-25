@@ -44,10 +44,15 @@ const Vote: NextPage = () => {
     <>
       <>
         <div className="flex flex-col items-center flex-grow pt-10">
+        <h1 className="mb-5 text-5xl font-bold text-neutral">Voting </h1>
           {/* User Joined, time to vote*/}
           {voterUser?.[0] && (
             <div>
-              <p><strong>Proposals</strong><br /> {ballotAddress}</p>
+              <p><strong className="mb-5 text-2xl text-accent">Contract address for this ballot:</strong><br /> {ballotAddress}</p>
+              <hr />
+              <hr />
+              <hr />
+                <p><strong className="mb-5 text-2xl text-accent">Proposals:</strong></p>
               <div className="flex flex-wrap gap-5">
                 {proposals?.map((proposal: any, i: number) => (
                   <div key={proposal} className="flex flex-col items-center">
